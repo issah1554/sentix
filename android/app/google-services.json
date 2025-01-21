@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "127017405817",
+    "project_id": "sentix-ab435",
+    "storage_bucket": "sentix-ab435.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127017405817:android:67bae3a1c911466ffff3a8",
+        "android_client_info": {
+          "package_name": "com.example.sentix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_4OL5ogUHhJd49FMkqcZcj1pcVfMc6dU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
