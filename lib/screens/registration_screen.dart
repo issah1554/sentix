@@ -104,26 +104,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register'),
-        backgroundColor: Colors.green, // Matching the app color
-        elevation: 0,
-      ),
-      body: Padding(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Register'),
+      backgroundColor: Colors.green, // Matching the app color
+      elevation: 0,
+    ),
+    resizeToAvoidBottomInset: true, // Adjust the screen when keyboard appears
+    body: SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start, // Align to start
           children: [
             // Logo or App Name (optional, you can replace it with your logo)
-            Text(
-              'Sentix App',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
+            Center(
+              child: Text(
+                'Sentix App',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
               ),
             ),
             const SizedBox(height: 50),
@@ -241,6 +245,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

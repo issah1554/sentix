@@ -55,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Transfer',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.build),
+            icon: Icon(Icons.store),
             label: 'Services',
           ),
           BottomNavigationBarItem(

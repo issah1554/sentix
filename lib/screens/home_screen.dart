@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   final String fullName;
@@ -136,9 +137,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return TextButton(
       onPressed: () {},
       style: ButtonStyle(
-        padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16, vertical: 10)),
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.green.shade50), // Light green background
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16, vertical: 10)),
+        backgroundColor: WidgetStateProperty.all<Color>(Colors.green.shade50), // Light green background
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12), // Rounded corners
             side: BorderSide(color: Colors.green, width: 1.5), // Green border
@@ -157,40 +158,172 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Helper function to build grid buttons with icons
-  Widget _buildGridButton(IconData icon, String label) {
-    return GestureDetector(
-      onTap: () {
-        // Handle navigation or action
+Widget _buildGridButton(IconData icon, String label) {
+  return GestureDetector(
+    onTap: () {
+      if (label == "Send") {
+        // Navigate to SendMoneyScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SendMoneyScreen()),
+        );
+      } else {
+        // Handle other actions
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Tapped on $label')),
         );
-      },
-      child: Card(
-        elevation: 4.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Rectangular items with rounded corners
-        ),
-        margin: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 40,
-              color: Colors.green,
+      }
+    },
+    child: Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 40,
+            color: Colors.green,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+}
+class SendMoneyScreen extends StatefulWidget {
+  @override
+  _SendMoneyScreenState createState() => _SendMoneyScreenState();
+}
+
+class _SendMoneyScreenState extends State<SendMoneyScreen> {
+  String? _selectedUser; // Variable to hold the selected user
+  final TextEditingController _amountController = TextEditingController(); // Controller for the amount input
+  List<Map<String, String>> _users = []; // List to store users fetched from Firestore
+  bool _isLoading = true; // Loading state
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsers(); // Fetch users when the screen loads
+  }
+
+  // Function to fetch users from Firestore
+Future<void> _fetchUsers() async {
+  try {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+    setState(() {
+      _users = snapshot.docs.map((doc) {
+        return {
+          "id": doc['uid']?.toString() ?? '', // Cast to String and handle null
+          "name": doc['full_name']?.toString() ?? '' // Cast to String and handle null
+        };
+      }).toList();
+      _isLoading = false;
+    });
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error fetching users: $e')),
+    );
+  }
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Send Money'),
+        backgroundColor: Colors.green,
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Select User:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButton<String>(
+                    isExpanded: true,
+                    value: _selectedUser,
+                    hint: const Text('Choose a user'),
+                    items: _users.map((user) {
+                      return DropdownMenuItem<String>(
+                        value: user['id'], // Use user ID as value
+                        child: Text(user['name']!), // Display user name
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedUser = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Enter Amount:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter amount to send',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_selectedUser != null &&
+                            _amountController.text.isNotEmpty) {
+                          // Handle sending money logic
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Sent ${_amountController.text} TZS to user ID $_selectedUser!',
+                              ),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Please select a user and enter an amount'),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                      child: const Text('Send Money'),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
